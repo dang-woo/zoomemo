@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./src/styles.css">
+    <link rel="shortcut icon" href="./src/주토피아.png" type="image/x-icon">
+    <!--  구글폰트 적용  -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Gamja+Flower&display=swap"
+          rel="stylesheet">
+</head>
+<body class="container">
+
+    <form id="memo" >
+        <div class="memoForm">
+            <label for="title"></label>
+            <input id="title" class="rectangle" type="text" placeholder="제목을 입력해주세요"><br>
+            <label for="contents"></label>
+            <textarea id="contents" class="rectangle" placeholder="내용을 입력해주세요"></textarea> <br>
+            <button type="submit" class="button">저장</button>
+
+
+        </div>
+    </form>
+        <h1>작성된 메모</h1>
+        <div class="memoList">
+            <h3 id="showMemo"></h3>
+        </div>
+
+
+<script>
+    // 사용자가 작성한 메모를 받아온다.
+    // 자바스크립트 객체를 JSON 문자열로 변환한다.
+    // 제목과 내용을 local storage 에 저장한다.
+    // local storage에 저장된 메모들을 화면에 보여준다.
+
+    const title = document.getElementById('title');
+    const contents = document.getElementById('contents');
+    const memo = document.getElementById('memo');
+
+    // id 값이 local storage 에 없다면 키를 생성하고 0부터 id 설정
+
+
+    memo.addEventListener('submit', (event) => { // 저장하기를 눌렀을 때
+
+        event.preventDefault(); // 페이지 새로고침 방지
+
+        // id 값이 로컬스토리지에 없다면 키를 생성하고 0부터 id 설정
+        let id = JSON.parse(localStorage.getItem('id'));
+        id = id ?? 0;
+
+        const newMemo = { // 객체 형식으로 사용자가 작성한 제목과 내용을 저장
+            title: title.value,
+            contents: contents.value,
+            id: id.value,
+            createdAt: new Date().toLocaleString() //현재 시간 저장
+        };
+
+        newMemo.id = id; // 메모에 id 지정
+
+        // storage 값을 꺼내오려고 했는데. 값이 없다면 오류가 나기 때문에 저장된 목록을 가져오고, 없다면 빈 배열을 만든다.
+        let memoList = JSON.parse(localStorage.getItem('memoList') || '[]');  // local storage에 텍스트로 저장된 것을 꺼내와서 객체 형식으로 전환한 리스트
+        memoList.push(newMemo); // 메모
+
+        localStorage.setItem('memoList', JSON.stringify(memoList)); // local storage 저장을 위해 텍스트 형식으로 변환
+        localStorage.setItem('id', JSON.stringify(++id)); // local storage 에 id 저장 - id 는 고유한 값을 가져야 하기 때문에 증가시켜준다.
+
+        alert("메모가 저장되었습니다.");
+        document.getElementById('memo').reset();
+
+        setMemo();
+
+    });
+
+    // local storage 에 저장된 메모들을 화면에 보여주기
+    function setMemo() {
+        const showMemo = document.getElementById('showMemo');
+        let memoList = JSON.parse(localStorage.getItem('memoList') || '[]');
+
+        while (showMemo.firstChild) {
+            showMemo.firstChild.remove();
+        }
+
+        for (let i = memoList.length - 1; i >= 0; i--) {
+            let article = document.createElement('article');
+            article.dataset.id = memoList[i].id; // article에 data-id 속성 추가
+
+            let memoTitle = document.createElement('h2');
+            memoTitle.textContent = memoList[i].title;
+
+            let memoTime = document.createElement('p');
+            memoTime.textContent = memoList[i].createdAt;
+
+            let memoContents = document.createElement('p');
+            memoContents.textContent = memoList[i].contents; // textContent로 수정
+
+            // 삭제 버튼만 생성
+            let deleteBtn = document.createElement('button');
+            deleteBtn.innerText = "삭제";
+            deleteBtn.onclick = deleteForm; // 삭제 이벤트 연결
+
+            article.append(memoTitle, memoContents, memoTime, deleteBtn);
+            showMemo.append(article);
+        }
+    }
+
+    // 삭제 기능 수정
+    function deleteForm(e) {
+        if (confirm('정말로 삭제하시겠습니까?')) {
+            let memoList = JSON.parse(localStorage.getItem('memoList') || '[]');
+            const targetId = e.target.parentNode.dataset.id;
+            
+            memoList = memoList.filter(memo => memo.id != targetId);
+            localStorage.setItem('memoList', JSON.stringify(memoList));
+            setMemo();
+        }
+    }
+
+    console.log(`
+♡ ∩_∩
+（„• ֊ •„)♡
+┏━∪∪━━━━┓
+♡ 제작: 동우 주경 주성 성리 ♡
+┗━━━━━━┛
+`);
+</script>
+
+</body>
+</html>
